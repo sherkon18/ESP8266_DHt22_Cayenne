@@ -1,0 +1,41 @@
+//ESP8266 microcontroller controller connected to DHT22 Temp/Hum sensor
+
+
+#define CAYENNE_PRINT Serial
+#include <CayenneMQTTESP8266.h>
+#include <DHT.h>
+#define DHTPIN 4 //ESP8266 pin D2 ****Very important***
+#define DHTTYPE DHT22
+
+
+DHT dht(DHTPIN, DHTTYPE);
+
+// WiFi network info.
+char ssid[] = "ENTER YOUR INFO HERE";
+char wifiPassword[] = "ENTER YOUR INFO HERE";
+
+// Cayenne authentication info. This should be obtained from the Cayenne Dashboard.
+char username[] = "ENTER YOUR INFO HERE";
+char password[] = "ENTER YOUR INFO HERE";
+char clientID[] = "ENTER YOUR INFO HERE";
+
+
+void setup() {
+  Serial.begin(115200);
+  Cayenne.begin(username, password, clientID, ssid, wifiPassword);
+  dht.begin();
+}
+
+void loop() {
+  Cayenne.loop();
+}
+
+CAYENNE_OUT_DEFAULT()
+{
+  float h = dht.readHumidity(); // Read humidity
+  float f = dht.readTemperature(true); // Read temperature in F
+  
+  Cayenne.virtualWrite(0,f); // Publish temp to cayenne mqtt broker, 0 is for channel, f is data
+  Cayenne.virtualWrite(1,h); //Publish hum to cayenne mqtt broker, 1 is for channel, h is data
+}
+
